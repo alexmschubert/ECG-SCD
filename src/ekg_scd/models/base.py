@@ -15,8 +15,6 @@ from torch.autograd import Variable
 from tqdm import tqdm
 #import wandb
 
-from ekg_scd.helpers.loss import SupervisedContrastiveLoss, SupConLoss
-
 def roc_auc_score_nan(y, p):
     nan_idx = pd.isnull(y) | pd.isnull(p)
     try:
