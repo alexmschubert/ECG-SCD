@@ -5,8 +5,6 @@ from tqdm import tqdm
 from multiprocessing import Pool, cpu_count
 from ekg_scd.helpers import preproc
 from biosppy.signals import ecg as bioecg
-import matplotlib.pyplot as plt
-
 
 def detect_s_peaks(ecg_data_avl_raw, first_diff_smooth_raw, sampling_rate=500, speak_window=61, threshold=0.01, consecutive_points=3, window_size=20):
     rpeaks, = bioecg.hamilton_segmenter(ecg_data_avl_raw, sampling_rate=sampling_rate)

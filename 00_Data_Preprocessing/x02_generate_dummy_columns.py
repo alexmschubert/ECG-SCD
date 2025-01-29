@@ -81,7 +81,6 @@ def main(input_file: str = "covariate_df.feather", output_file: str = "covariate
     df['qrsHorizAxis'] = np.random.uniform(low=-90, high=90, size=len(df))
     
     # Save augmented dataframe
-    df.to_csv(f'{output_file}.csv', index=False) 
     df.to_feather(f'{output_file}.feather')
 
 

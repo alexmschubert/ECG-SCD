@@ -1,7 +1,5 @@
-"""Convert the pre-trained torch beat model to a JAX model
-
-This is messy and crude---we do not recommend following this approach. Results were tested across both models to
-ensure consistent results.
+"""
+Convert the pre-trained torch beat model to a JAX model
 """
 
 import jax.numpy as jnp

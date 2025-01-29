@@ -9,7 +9,6 @@ import matplotlib.pyplot as plt
 
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import roc_auc_score
-from sklearn import preprocessing
 
 # Local imports
 from ekg_scd.helpers.regress import sm_regress, tt_split

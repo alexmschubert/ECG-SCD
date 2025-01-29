@@ -1,7 +1,3 @@
-# We saved the outputs from the previous step in a very lazy way, because we were rushing. Here, we will be more
-# thorough in transforming the outputs for plotting. (Unfortunately the ideal plotting functions are in R, so we will
-# have to use another script.)
-
 import argparse
 import pathlib
 import pandas
@@ -19,7 +15,6 @@ import s05_utils_vae as utils_vae
 import s08_train_generator as generator
 
 
-# IF RUNNING ON HALLAND SERVER:
 # paths to all important data to be loaded
 MODEL_GEN_DIRNAME = pathlib.Path("generative_models/models")
 MODEL_PRED_COEF_FILEPATH = pathlib.Path("modelfits_beat/Beatmodel_2024_03_11_filter_tropt_ami/model.best.pth.tar")
@@ -38,7 +33,6 @@ def parse_args(config_path: pathlib.Path) -> typing.Dict[str, typing.Any]:
 
 
 def reconstruct_ecg(x, result, key):
-    # Note that we scrap the sampled sigmasq to produce higher-fidelity reconstructions
     mu, sigmasq = result["apply_fn_enc"](result["params_enc"], x)
     z = utils_vae.gaussian_sample(key, mu, 0 * sigmasq)
     decode_fn = lambda z: result["apply_fn_dec"](result["params_dec"], z).reshape(x.shape)
@@ -65,9 +59,6 @@ def smooth_ecg(x, window_size: int = 5):
 
 
 if __name__ == "__main__":
-    # model_configs = pathlib.Path("02_Morphing/models_config.yaml")
-    # config = parse_args(config_path=model_configs)
-
     parser = argparse.ArgumentParser()
     parser.add_argument("--n_channels", type=int, default=12)  # number of channels to use
     parser.add_argument("--seed", type=int, default=0)  # random seed
@@ -84,7 +75,7 @@ if __name__ == "__main__":
     X_dataset, _ = utils_data.load_dataset(
         ecg_data_dirname=pathlib.Path("ecg_beats"),
         covariate_data_filepath=covariate_data_filepath,
-        split=(0.05, 0.01), #TODO change to normal (1,0)
+        split=(0.30, 0.30), 
         outcome_names=['scd3mo', 'scd6mo', 'scd1', 'scd2', 'dead3mo', 'dead6mo', 'dead1', 'dead2', 'ICD_VT1', 'ICD_VF1', 'Phi_VT1', 'TROPT1', 'Acute_MI1', 'age', 'female', 'qrsDuration', 'qtInterval', 'qrsFrontAxis', 'qrsHorizAxis', 'rrInterval', 'pDuration', 'atrialrate', 'meanqtc'],
         outcome_regress=outcome_regress
     )
@@ -95,22 +86,17 @@ if __name__ == "__main__":
     Xs = jnp.array(torch.stack([X_dataset[i][0] for i in idx]))
 
     # load generative model
-    # must make sure X has correct dimension, see note at top
     model_vae = generator.load_model(Xs, MODEL_GEN_DIRNAME, configs=args)
 
     # first, create a dataset of original ECG values, smoothed ECG values, and reconstructed ECG values
     results_single = {}
     for i, (xi, yi) in tqdm.tqdm(enumerate(X_dataset), total=len(X_dataset)):
-        ## Extract inputs
         
         # ID variables
         filepath_curr_i = X_dataset.filepaths[i]
 
         # fix inputs
         xi = jnp.array(xi)
-        xi_smooth3 = smooth_ecg(xi, window_size=3)
-        xi_smooth5 = smooth_ecg(xi, window_size=5)
-        xi_smooth7 = smooth_ecg(xi, window_size=7)
         xi_hat = reconstruct_ecg(jnp.array(xi), model_vae, jr.PRNGKey(0))
 
         # These are used to calculate within-beat, within-wave, and across-wave error terms
@@ -118,7 +104,7 @@ if __name__ == "__main__":
         beat_i = beat_i.replace(".npz", "") 
 
         # store all results
-        results_single[i] = {"filepath": str(filepath_curr_i), "wave": wave_i, "beat": beat_i, "x_raw": xi, "x_smooth3": xi_smooth3, "x_smooth5": xi_smooth5, "x_smooth7": xi_smooth7, "x_hat": xi_hat}
+        results_single[i] = {"filepath": str(filepath_curr_i), "wave": wave_i, "beat": beat_i, "x_raw": xi, "x_hat": xi_hat}
 
         if i > 500:
             break
@@ -134,9 +120,6 @@ if __name__ == "__main__":
     results_pairwise_df["err_rmse"] = numpy.sqrt(results_pairwise_df["err_mse"])
 
     ## EXPORT DATA
-
-    # save raw ECGs first
-    # convert jax arrays to list format
     results_single_df["ecg_values"] = results_single_df["ecg_values"].apply(lambda x: x.tolist())
     results_single_df.to_feather(MORPH_OUTPUT_DIRNAME.joinpath("reconstruction-raw.feather"))
 

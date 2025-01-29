@@ -39,7 +39,6 @@ if __name__ == '__main__':
 
     # Create flags that don't yet exist
     covariate_df["ef_below_35"] = covariate_df["most_recent_ef"] < 35
-    print(covariate_df["VTVF"])
     covariate_df["VTVF"] = covariate_df["VTVF"].astype(int)
     covariate_df["heartRate_above_120"] = covariate_df["heartRate"] > 120
     covariate_df["pDuration_above_120"] = covariate_df["pDuration"] > 120

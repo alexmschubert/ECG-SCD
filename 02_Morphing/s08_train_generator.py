@@ -17,7 +17,7 @@ import s03_models as models
 import s04_utils_data as utils_data
 import s05_utils_vae as utils_vae
 import s06_utils_dsm as utils_dsm
-import s09_convert_cnn_orig as convert_cnn
+import s07_convert_cnn_orig as convert_cnn
 
 # temporary variable while we load data
 MODEL_DIRNAME = pathlib.Path("generative_models")
@@ -117,7 +117,6 @@ def generate_and_save_ecgs(X, result, gen_result_path, configs):
             x_init = jr.uniform(key1, x_dim)
             xs = utils_dsm.sample_annealed_langevin(result.apply_fn, x_init, result.params, key2)
             x = jnp.swapaxes(xs[-1].squeeze(), 0, 1)
-            print(x.shape)
             ecgs.append(x)
             fig, _ = utils.plot_ecg(x, CHANNEL_NAMES, configs.n_channels, (2 * configs.n_channels, 6))
             fig.savefig(pathlib.Path(gen_result_path, f"ecg_{i+1}.png"))
@@ -216,7 +215,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     ## DISCRIMINATIVE MODEL
-    # download pytorch state dictionary
     warnings.warn("Use model JSON to extract head names")
     pytorch_metadata = json.load(open(MODEL_PRED_METADATA_FILEPATH, "r"))
     pytorch_results = torch.load(MODEL_PRED_COEF_FILEPATH, map_location=torch.device("cpu"))
@@ -227,7 +225,6 @@ if __name__ == "__main__":
     model_resnet_jax = convert_cnn.EKGResNetModel(out_features=pytorch_metadata['n_outputs'], output_names=pytorch_metadata['outputs'], rep_mp=5)
 
     # create a jax prediction function
-    # be sure to sigmoid transform, so that beta is calculated over probabilities, not raw sigmoid values
     morph_outcome_index = pytorch_metadata["outputs"].index(MORPH_OUTCOME_NAME)
     discriminative_pred_fn = lambda x: jax.nn.sigmoid(model_resnet_jax.apply(jax_state_dict_ported, x.reshape(1, *x.shape).transpose(0, 2, 1), train=False)[:, morph_outcome_index])
 

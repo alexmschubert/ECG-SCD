@@ -11,7 +11,7 @@ import numpy
 import jax
 import neurokit2
 
-import s09_convert_cnn_orig as convert_cnn
+import s07_convert_cnn_orig as convert_cnn
 
 MODEL_PRED_COEF_FILEPATH = pathlib.Path("modelfits_beat/Beatmodel_2024_03_11_filter_tropt_ami/model.best.pth.tar")
 MODEL_PRED_METADATA_FILEPATH = pathlib.Path("modelfits_beat/Beatmodel_2024_03_11_filter_tropt_ami.json")
@@ -68,7 +68,6 @@ if __name__ == "__main__":
     apply_fn = lambda p, x: model_resnet_jax.apply(p, x.reshape((1, *x.shape)).transpose(0, 2, 1), train=False)
     
     ## LOAD DATA
-    # load morph results from stacked data
     ecg_dir = pathlib.Path(MORPH_OUTPUT_DIRNAME, "morphed_ecgs")
     ecg_morphed_df = pandas.read_feather(MORPH_OUTPUT_DIRNAME.joinpath("morph-ecg.feather"))
     ecg_morphed_df["ecg_type"] = ecg_morphed_df["type"].apply(lambda v: {"raw": "x_morph_raw", "t0": "x_morph_init", "tfinal": "x_morph_final"}[v])
@@ -86,7 +85,6 @@ if __name__ == "__main__":
     )
     ecg_combined_df["row_id"] = range(len(ecg_combined_df))
 
-    # we can actually just iterate over rows for calculations
     results = {}
     for _, ecg_row in tqdm.tqdm(ecg_combined_df.iterrows(), total=ecg_combined_df.shape[0]):
         # get helpful filename suffix

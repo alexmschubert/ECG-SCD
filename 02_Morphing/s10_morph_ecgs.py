@@ -17,10 +17,7 @@ import s04_utils_data as utils_data
 import s05_utils_vae as utils_vae
 import s08_train_generator as generator
 import s09_convert_cnn_orig as convert_cnn
-# import s09_convert_cnn_alex as convert_cnn
 
-
-# IF RUNNING ON HALLAND SERVER:
 # paths to all important data to be loaded
 MODEL_PRED_COEF_FILEPATH = pathlib.Path("modelfits_beat/Beatmodel_2024_03_11_filter_tropt_ami/model.best.pth.tar")
 MODEL_PRED_METADATA_FILEPATH = pathlib.Path("modelfits_beat/Beatmodel_2024_03_11_filter_tropt_ami.json")
@@ -28,7 +25,7 @@ MODEL_GEN_DIRNAME = pathlib.Path("generative_models/models")
 MORPH_OUTPUT_DIRNAME = pathlib.Path("morphing_outputs") 
 
 MORPH_OUTCOME_NAME = "scd1"
-MORPH_RECONSTRUCTION_ERR_MAX = 0.15
+MORPH_RECONSTRUCTION_ERR_MAX = 0.1
 MORPH_YHAT_UPPER_BOUND = 1.0
 
 
@@ -100,7 +97,6 @@ if __name__ == "__main__":
     ecg_dir.mkdir(exist_ok=True)
 
     ## DISCRIMINATIVE MODEL
-    # download pytorch state dictionary
     warnings.warn("Use model JSON to extract head names")
     pytorch_metadata = json.load(open(MODEL_PRED_METADATA_FILEPATH, "r"))
     pytorch_results = torch.load(MODEL_PRED_COEF_FILEPATH, map_location=torch.device("cpu"))
@@ -112,16 +108,10 @@ if __name__ == "__main__":
 
     # create a jax prediction function
     morph_outcome_index = pytorch_metadata["outputs"].index(MORPH_OUTCOME_NAME)
-
-    #apply_fn = lambda p, x: model_resnet_jax.apply(p, x.reshape((1, *x.shape)).transpose(0, 2, 1), train=False)[:, morph_outcome_index]
     
     @jax.jit
     def apply_fn(p, x):
         return model_resnet_jax.apply(p, x.reshape((1, *x.shape)).transpose(0, 2, 1), train=False)[:, morph_outcome_index]
-    # Load dataset
-    # create matrix of random values in jax.numpy
-    # warnings.warn("\n\n\n\t*** USING FAKE DATA ***\t\n\n\n")
-    # X = jr.normal(jr.PRNGKey(args.seed), (700, args.n_channels, 300))
 
     covariate_data_filepath = pathlib.Path(f"covariate_df.feather")
     outcome_regress = [False, False, False, False, False, False, False, False, False, False, False, False, False, True, False, True, True, True, True, True, True, True, True]
@@ -140,7 +130,6 @@ if __name__ == "__main__":
     Xs = jnp.array(torch.stack([X_dataset[i][0] for i in idx]))
 
     # load generative model
-    # must make sure X has correct dimension, see note at top
     result = generator.load_model(Xs, MODEL_GEN_DIRNAME, configs=args)
 
     # Morph
@@ -160,7 +149,6 @@ if __name__ == "__main__":
         print(f"Morphing ECG {i+1}/{args.n_ecgs} (pred: {pred})")
         
         # Subspace morph
-        # Dimensions are annoying here
         xs_sm = subspace_morph(x, jax_state_dict_ported, apply_fn, result, lr=args.lr, n_steps=2000, yhat_max=MORPH_YHAT_UPPER_BOUND)
 
         # store raw data only

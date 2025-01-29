@@ -1,6 +1,3 @@
-#! /usr/bin/env python3
-# -*- coding: utf-8 -*-
-""" Train a model on Halland ECG data """
 import gc
 import json
 import os
