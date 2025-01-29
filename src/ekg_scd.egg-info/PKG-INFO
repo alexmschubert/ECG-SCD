@@ -1,0 +1,12 @@
+Metadata-Version: 2.1
+Name: ekg-scd
+Version: 0.0.0a0
+Summary: Internal package for predicting Sudden Cardiac Death from EKGs.
+Author: John Luby, Alexander Schubert, Luke Frymire
+Author-email: alexander_schubert@berkeley.edu
+Classifier: License :: Other/Proprietary License
+Classifier: Natural Language :: English
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Requires-Python: >=3.6
+License-File: LICENSE
