@@ -32,10 +32,8 @@ class Block1(nn.Module):
         x = nn.BatchNorm(use_running_average=not train, momentum=0.9, epsilon=1e-05)(x)
         x = nn.relu(x)
         x = nn.Dropout(0.5, deterministic=not train)(x)
-        # lose dimension here (replicate bug from torch model)
         x = x[:, :-1, :]
         x = nn.Conv(features=self.features, kernel_size=self.kernel_size, strides=self.stride, padding=self.kernel_size[0] // 2)(x)
-        # lose dimension here (replicate bug from torch model)
         x = x[:, :-1, :]
         return x
 
@@ -80,7 +78,7 @@ class EKGResNetModel(nn.Module):
         # block 1 does some residual work too
         xmp = nn.max_pool(x, window_shape=(2,), strides=(2,), padding='VALID')
         xsub = x[:, ::2, :]
-        # block0 convolution adds a sample: to align, drop last subsample when x.shape[2] is odd.
+        # block 0 convolution adds a sample: to align, drop last subsample when x.shape[2] is odd.
         xsub = (xsub[:, :-1, :] if x.shape[1] % 2 == 1 else xsub)  
         xsub = Block1(features=64, kernel_size=(16,), stride=(1,))(xsub, train=train)
         x = xsub + xmp
@@ -98,7 +96,7 @@ class EKGResNetModel(nn.Module):
         x = nn.relu(x)
 
         # Flattening and fully connected layer
-        x = x.reshape((x.shape[0], -1))  # Flatten
+        x = x.reshape((x.shape[0], -1))  
         x = nn.Dense(self.out_features)(x)
 
         return x
@@ -119,9 +117,7 @@ def transform_key(pytorch_key):
     layers_final_a = {'bias': 'bias', 'weight': 'kernel'}
     layers_final_b = {'bias': 'bias', 'weight': 'scale', "running_mean": "mean", "running_var": "var"}
 
-    # iterate over parts of torch key
-    # sometimes we need to grab the following key as well, so do this via index
-    # block0:
+    # block 0:
     if parts[1] == "block0":
         conv_flag = parts[2] == "0"
         jax_key = [jax_key_0, "Block0_0", "Conv_0" if conv_flag else "BatchNorm_0", layers_final_a[parts[-1]] if conv_flag else layers_final_b[parts[-1]]]
@@ -141,10 +137,10 @@ def transform_key(pytorch_key):
     # repblock:
     if parts[1] == "rep_blocks":
         jax_keys = [jax_key_0]
-        # get block number
+        
         block_n = parts[2]
         jax_keys.append("RepBlock_" + block_n)
-        # get next part
+        
         maps_next = {
             "block1.0": "BatchNorm_0",
             "block1.3": "Conv_0",
@@ -156,7 +152,6 @@ def transform_key(pytorch_key):
         jax_keys.append(layers_final_a[parts[-1]] if parts[4] == "3" else layers_final_b[parts[-1]])
         return jax_keys
 
-    # final blocks--im tired just hard code
     if pytorch_key == "net.block_out.0.weight":
         return [jax_key_0, "BatchNorm_0", "scale"]
     elif pytorch_key == "net.block_out.0.bias":
@@ -183,7 +178,7 @@ def pytorch_to_jax(pytorch_state_dict):
     for k, v in pytorch_state_dict.items():
         # Transform the key to match JAX naming and structure
         # This step is highly specific to the model architecture and naming convention
-        jax_key = transform_key(k)  # Implement this function based on your model's parameter naming
+        jax_key = transform_key(k)  
 
         # none corresponds to parameters not yet tracked by JAX, skip
         if jax_key is None:

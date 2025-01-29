@@ -157,10 +157,6 @@ def propensity_score(X, y, ptIds):
     This function forms the backbone of propensity score batch matching.
     """
 
-    # bayes_optimize(X,y,ptIds)
-    # grid_params = {'alpha': 0, 'colsample_bytree': 0.6, 'learning_rate': 0.2, 'max_depth': 1, 'n_estimators': 80} # -0.039607 # From grid search
-    # bo_params = {'alpha': 6.962210599522835, 'colsample_bytree': 0.054799525942703764, 'learning_rate': 0.3648883299756203, 'max_depth': int(2.958742456317183), 'n_estimators': int(73.02143225521587)} # -0.039602 # From BO
-    # bo_params = {'colsample_bytree': 0.18679836537935046, 'alpha': 10**-0.7599412644046271, 'learning_rate': 10**-0.36146814574080943, 'max_depth': int(1.252052792872509), 'n_estimators': int(140.43925022704045)} # -0.039605 # From BO
     bo_params = {
         "colsample_bytree": 1.0,
         "alpha": 10**-1.1478107544038918,

@@ -178,7 +178,7 @@ def fit_model(model, train_loader, val_loader, **kwargs):
     # [OPTIONAL] log model performance using wandb
     # wandb.init(project="ECG-Halland",
     #         #name="your_run_name",
-    #         entity="alexander_schubert",
+    #         entity="your_entity_name",
     #         config=kwargs)
 
     do_cuda = kwargs.get("do_cuda", torch.cuda.is_available())
@@ -247,7 +247,7 @@ def fit_model(model, train_loader, val_loader, **kwargs):
             epoch, model, val_loader, optimizer, do_cuda, only_compute_loss=True, log_interval=log_interval, covariate_conditioning=covariate_conditioning
         )
 
-        # Log metrics to wandb
+        # [optional] Log metrics to wandb
         # wandb.log({"train_loss": tloss, "val_loss": vloss, 'val_auc': float(vstat[0]), "epoch": epoch})
 
         print(f"Loss ({epoch}): {round(vloss,6)}, Stat: {[round(float(v),6) for v in vstat]}")

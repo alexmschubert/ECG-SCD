@@ -15,8 +15,9 @@ import pickle
 
 import s04_utils_data as utils_data
 import s05_utils_vae as utils_vae
+import s07_convert_cnn_orig as convert_cnn
 import s08_train_generator as generator
-import s09_convert_cnn_orig as convert_cnn
+
 
 # paths to all important data to be loaded
 MODEL_PRED_COEF_FILEPATH = pathlib.Path("modelfits_beat/Beatmodel_2024_03_11_filter_tropt_ami/model.best.pth.tar")

@@ -19,7 +19,6 @@ import s05_utils_vae as utils_vae
 import s06_utils_dsm as utils_dsm
 import s07_convert_cnn_orig as convert_cnn
 
-# temporary variable while we load data
 MODEL_DIRNAME = pathlib.Path("generative_models")
 MODEL_PRED_COEF_FILEPATH = pathlib.Path("modelfits_beat/Beatmodel_2024_03_11_filter_tropt_ami/model.best.pth.tar")
 MODEL_PRED_METADATA_FILEPATH = pathlib.Path("modelfits_beat/Beatmodel_2024_03_11_filter_tropt_ami.json")
@@ -233,7 +232,6 @@ if __name__ == "__main__":
     covariate_data_filepath = pathlib.Path("covariate_df.feather")
     outcome_regress = [False, False, False, False, False, False, False, False, False, False, False, False, False, True, False, True, True, True, True, True, True, True, True]
     
-    # UPDATE: here we replace CLI args with ones from other local script for running on halland data
     X_tr, _ = utils_data.load_data(
         ecg_data_dirname=pathlib.Path("ecg_beats"),
         covariate_data_filepath=covariate_data_filepath,

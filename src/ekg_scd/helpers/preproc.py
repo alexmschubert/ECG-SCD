@@ -1,8 +1,4 @@
 """ functions for preprocessing raw EKG signal
-
-e.g. de-trending EKG leads using gaussian smoothing, squashing the range into 
-[-1, 1]preprocess EKG signal functions
-
 primarily used in dataset class definition
 """
 import math

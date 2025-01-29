@@ -45,6 +45,6 @@ if __name__ == "__main__":
 
         dfs.append(df)
 
-    # also save all data in a single feather file, not in crowded morph folder
+    # Save all data in a single feather file
     df_all = pandas.concat(dfs)
     df_all.to_feather(MORPH_OUTPUT_DIRNAME.joinpath("morph-ecg.feather"))

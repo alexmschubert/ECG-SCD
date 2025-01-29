@@ -2,14 +2,10 @@
 Utility function for running a forward pass of a model over a provided set of IDs.
 """
 
-import os
-
 import numpy as np
 import pandas as pd
 import torch
 from tqdm import tqdm
-import pathlib
-import itertools
 
 from ekg_scd.datasets import Hallandata, HallandEKGBeats
 from ekg_scd.helpers import models
@@ -27,33 +23,20 @@ def predict_beats(
     sig_length=5000,
     ensemble_models=None,
     ensemble_paths=None,
-    stack=False,
-    oversample_scd = True,
     cumulative_predictor=False,
     train_ids=None,
     in_sample = True,
     one_beat: bool = True,
-    clean_beats_path: str = 'path/to/beats',
     rep_mp = 5
 ):
 
-    # subset to only those IDs which successfully stack
-    if stack:
-        stackable_ids = [int(idx[:-4]) for idx in os.listdir(f"{DATA_DIR}/stacked_X")]
-        val_ids = np.array(list(set(val_ids).intersection(set(stackable_ids))))
-    
-    # normalization_data = np.load(f'scale_factors/normalization_stats_clean.pickle', allow_pickle=True)
     
     if in_sample and train_ids:
         val = HallandEKGBeats(train_ids, data_dir, 300, True, 5000, outputs=outputs, regress=regress, preprocessing=preprocessing, transform=False, train=True,  covariate_df=covariate_df_path,
-            # mean=normalization_data['mean'], std=normalization_data['std'], 
-            # targetmean=normalization_data['targetmean'],targetstd=normalization_data['targetstd'], oversample_scd=oversample_scd,
-            one_beat=True, to_mV=False, source_labels=True) #TODO consider standardizing targets if necessary
+            one_beat=True, to_mV=False, source_labels=True) 
     else:
         val = HallandEKGBeats(val_ids, data_dir, 300, True, 5000, outputs=outputs, regress=regress, preprocessing=preprocessing, transform=False, train=True,  covariate_df=covariate_df_path,
-            # mean=normalization_data['mean'], std=normalization_data['std'], 
-            # clean_beats_path=clean_beats_path,targetmean=0,targetstd=1, oversample_scd=oversample_scd,
-                              one_beat=False, to_mV=False, source_labels=True) #TODO consider standardizing targets if necessary
+                              one_beat=False, to_mV=False, source_labels=True) 
 
     # establish model parameters
     param_X, param_y, _ = val[0] #
@@ -95,24 +78,19 @@ def predict(
     sig_length=5000,
     ensemble_models=None,
     ensemble_paths=None,
-    # stack=False,
     cumulative_predictor=False,
     train_ids=None,
     in_sample = True,
     dropout = 0.5,
     covariate_conditioning: list = None,
     covariate_df_path = f"covariate_df.feather",
-    x_dir = '//lthalland.se/vdata/ECG/X_new',
+    x_dir = 'path/to/data',
     conv_channels = 128,
     attention = 'max',
     rep_mp = 4,
     num_rep_blocks = 12,
 ):
 
-    # subset to only those IDs which successfully stack
-    # if stack:
-    #     stackable_ids = [int(idx[:-4]) for idx in os.listdir(f"{DATA_DIR}/stacked_X")]
-    #     val_ids = np.array(list(set(val_ids).intersection(set(stackable_ids))))
     # establish dataset for sampling later
     if train_ids is not None and in_sample:
 
@@ -124,7 +102,6 @@ def predict(
             aug=aug,
             preprocessing=preprocessing,
             covariate_df=covariate_df_path,
-            # stack=stack,
             covariate_conditioning = covariate_conditioning,
             x_dir = x_dir
         )
@@ -136,7 +113,6 @@ def predict(
             train=False,
             aug=None,
             preprocessing=preprocessing,
-            # stack=stack,
             covariate_df=covariate_df_path,
             covariate_conditioning = covariate_conditioning,
             conditioning_mean=train.conditioning_mean,
@@ -152,7 +128,6 @@ def predict(
             train=True,
             aug=aug,
             preprocessing=preprocessing,
-            # stack=stack,
             covariate_conditioning = covariate_conditioning,
             covariate_df=covariate_df_path,
             x_dir = x_dir
@@ -165,7 +140,6 @@ def predict(
             train=False,
             aug=None,
             preprocessing=preprocessing,
-            # stack=stack,
             covariate_conditioning = covariate_conditioning,
             conditioning_mean=train.conditioning_mean,
             conditioning_std=train.conditioning_std,
@@ -270,7 +244,7 @@ def make_predictions_beats(m, val_ids, val, outputs):
     m.eval()
     
     # Decide on device (GPU if available, otherwise CPU)
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     m.to(device)
 
     # Prepare DataLoader

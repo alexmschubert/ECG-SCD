@@ -70,7 +70,6 @@ class SegmentedECG():
         self.duplicate_peaks = self.identify_duplicate_peaks()
         
         # Check exclusion criteria
-        # get per lead range
         max_vals = [torch.max(beat, dim=1)[0] for beat in self.beats]
         min_vals = [torch.min(beat, dim=1)[0] for beat in self.beats]
         ecg_range_per_lead = [max_val - min_val for max_val, min_val in zip(max_vals, min_vals)]
@@ -99,8 +98,7 @@ class SegmentedECG():
         """
         Identifies windows that contain more than one of any kind of peak (P, Q, R, S, T).
         """
-        peak_types = ['ECG_R_Peaks'] #'ECG_P_Peaks', 'ECG_Q_Peaks', 'ECG_S_Peaks', 'ECG_T_Peaks' 
-        #print(self.rpeaks)
+        peak_types = ['ECG_R_Peaks'] 
         return [any(sum(1 for peak in self.rpeaks[peak_type] if l < peak < r) > 1 for peak_type in peak_types) for (l, r) in self.beat_windows]
 
     def process_signal(self, scaling_factor=None):
@@ -124,7 +122,7 @@ class SegmentedECG():
         """
         Plots the full ECG signal, optionally with beat windows highlighted.
         """
-        fig, axes = plt.subplots(nrows=signal.shape[0], ncols=1, sharex=True)
+        fig, axes = plt.subplots(nrows=self.signal.shape[0], ncols=1, sharex=True)
         for i, ax in enumerate(axes):
             ax.plot(self.signal[i])
             if i == 0:
@@ -137,7 +135,7 @@ class SegmentedECG():
                 for (l, r) in windows:
                     ax.axvspan(l, r, alpha=0.2, color='red')
         ax.set_title(f'ECG {self.id}')
-        ax.set_xlabel(f'Window: {sanitize_str(str(self.window_lims))}')
+        ax.set_xlabel(f'Window: {str(self.window_lims)}')
         return fig, ax
     
     def save_beats(self, out_dir, filtered=True):

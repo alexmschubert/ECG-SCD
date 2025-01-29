@@ -1,59 +1,14 @@
 """ 
 Variable definitions used throughout the project. 
-
 Defined in python for ease and conciseness.
 """
-import os
-
-#Small multimodal set #"most_recent_ef"
-EHR_SMALL = ["thiozide_diuretics30","betablock30","calchannelblock30","aceinhibitors30","angiotensin_recep_block30", 
- "statins30", "warfarin30", "direc_thrombin_inhib30", "direc_factorxa_inhib30", "antiarr30",
- 'atrialrate', 'bigeminycount', 'bigeminystring', 'deltawavecount', 'deltawavepercent',  'flutterfibcount',  'highventrate',  
-'lowventrate', 'meanventrate',  'numberofcomplexes',  'pacemalf', 'pacemisc',   'qtintdispersion',   'trigeminycount', 'trigeminystring', 'wenckcount', 'wenckstring',
-'heartRate', 'pDuration',    'qrsDuration',  'qtInterval', 'qtcb', 
-'qtcf',  'rrInterval',
-'tempF', 'humidity', 'FeelsLikeF',
-"age", "female", "ef_na",
-"ICD_VT",
-"ICD_VF",
-"Phi_VT",
-"ST_elevation",
-"ST_depression",
-"qtc500",
-"LBBB",
-"antiarr",
-"deltawave",
-"CHF_Cardiomyopathy",
-"Hypertension",
-"CAD",
-"Diabetes",
-"Hyperlipidemia",
-"TROPT40",
-"Acute_MI",
-"Old_MI",]
 
 #Meds in past 30 days
 MEDS30 = ["thiozide_diuretics30","betablock30","calchannelblock30","aceinhibitors30","angiotensin_recep_block30", 
  "statins30", "warfarin30", "direc_thrombin_inhib30", "direc_factorxa_inhib30", "antiarr30"]
 
-#Flags only reliably available for ECGs from Philipps machines (sourceId 6 and 21)
-ECG_FLAGS = ['atrialrate', 'bigeminycount', 'bigeminystring', 'deltawavecount', 'deltawavepercent',  'flutterfibcount', 'frontpcwrot', 'frontpinitangle', 'frontpinitmag', 
-'frontpmaxangle', 'frontpmaxmag', 'frontptermangle', 'frontptermmag', 'frontqrscwrot', 'frontqrsinitangle', 'frontqrsinitmag', 'frontqrsmaxangle', 'frontqrsmaxmag', 'frontqrstermangle', 
-'frontqrstermmag', 'fronttcwrot', 'fronttinitangle', 'fronttinitmag', 'fronttmaxangle', 'fronttmaxmag', 'frontttermangle', 'frontttermmag', 'highventrate',  
-'lowventrate', 'meanprint', 'meanprseg', 'meanqrsdur', 'meanqtint', 'meanventrate',  'numberofcomplexes',  'pacemalf', 'pacemisc',   'qtintdispersion', 'sagpcwrot', 'sagpinitangle', 'sagpinitmag', 'sagpmaxangle', 'sagpmaxmag', 'sagptermangle', 
-'sagptermmag', 'sagqrscwrot', 'sagqrsinitangle', 'sagqrsinitmag', 'sagqrsmaxangle', 'sagqrsmaxmag', 'sagqrstermangle', 'sagqrstermmag', 'sagtcwrot', 'sagtinitangle', 'sagtinitmag', 
-'sagtmaxangle', 'sagtmaxmag', 'sagttermangle', 'sagttermmag',   'transpcwrot', 'transpinitangle',
- 'transpinitmag', 'transpmaxangle', 'transpmaxmag', 'transptermangle', 'transptermmag', 'transqrscwrot', 'transqrsinitangle', 'transqrsinitmag', 'transqrsmaxangle', 
- 'transqrsmaxmag', 'transqrstermangle', 'transqrstermmag', 'transtcwrot', 'transtinitangle', 'transtinitmag', 
-'transtmaxangle', 'transtmaxmag', 'transttermangle', 'transttermmag', 'trigeminycount', 'trigeminystring', 'wenckcount', 'wenckstring'] 
-# non-numeric data types 'fixedmultpflag','qrslikeartfflag','multptestvalidflag', 'pacebeatmeasflag' 
-# Too many missing values on Philipps machines 't40frontaxis', 't40horizaxis', 'i40frontaxis', 'i40horizaxis','pfrontaxis', 
-# 'phorizaxis','qrsfrontaxis', 'qrshorizaxis','stfrontaxis', 'sthorizaxis','tfrontaxis', 'thorizaxis',
-
 ECG_HEADERMEASURES = ['heartRate', 'pDuration',    'qrsDuration',  'qtInterval', 'qtcb', 
-'qtcf',  'rrInterval'] #'qtco', 'tOnset' excluded as missing for most variables
-# Too many missing values on Philipps machines 't40frontaxis', 't40horizaxis','i40FrontAxis', 'i40HorizAxis','pFrontAxis', 
-# 'pHorizAxis','prInterval','qOnset','qrsHorizAxis','stFrontAxis', 'stHorizAxis','t40FrontAxis', 't40HorizAxis', 'tFrontAxis', 'tHorizAxis', 'qrsFrontAxis',
+'qtcf',  'rrInterval'] 
 
 # Env at time of ECG
 ENV_DATA = ['tempF', 'humidity', 'FeelsLikeF']
@@ -100,60 +55,7 @@ HEART_DISEASE_CODES = (
     + [f"Q{i}" for i in range(20, 25)]
     + [f"R{i}" for i in range(95, 100)]
 )
-CARDIAC_CONTROLS = [
-    "ICD_VT",
-    "ICD_VF",
-    "Phi_VT",
-    "ST_elevation",
-    "ST_depression",
-    "qtc500",
-    "LBBB",
-    "antiarr",
-    "deltawave",
-    "CHF_Cardiomyopathy",
-    "Hypertension",
-    "CAD",
-    "Diabetes",
-    "Hyperlipidemia",
-    "TROPT40",
-    "Acute_MI",
-    "Old_MI",
-]
 
-MECHANISM_VARS = ['Potassium_low1','Potassium_high1','Magnesium_low1','Magnesium_high1', 'Calcium_low1','Calcium_high1',
-    'Acute_MI1','TROPT1','ST_elevation1','ST_depression1','qtc5001','antiarr1','VFVT1','LBBB1','deltawave1',
-    "Abnormal_blood_pressure_no_diag1", "Abnormalities_of_breathing1", "Pain_throat_chest1", "Malaise_fatigue1",
-    "Syncope_collapse1","Convulsions1","Shock1"]
-
-MECH_CONTROLS = ['Potassium_low','Potassium_high','Magnesium_low','Magnesium_high', 'Calcium_low','Calcium_high',
-    'Acute_MI_pre','TROPT','ST_elevation','ST_depression','qtc500','antiarr','VFVT','LBBB','deltawave',
-    "Abnormal_blood_pressure_no_diag", "Abnormalities_of_breathing", "Pain_throat_chest", "Malaise_fatigue",
-    "Syncope_collapse","Convulsions","Shock"]
-
-MECH_VARS_POST_PRE = {
-    'Potassium_low1': 'Potassium_low',
-    'Potassium_high1':'Potassium_high',
-    'Magnesium_low1':'Magnesium_low',
-    'Magnesium_high1':'Magnesium_high',
-    'Calcium_low1':'Calcium_low',
-    'Calcium_high1':'Calcium_high',
-    'Acute_MI1':'Acute_MI',
-    'TROPT1':'TROPT',
-    'ST_elevation1':'ST_elevation',
-    'ST_depression1':'ST_depression',
-    'qtc5001':'qtc500',
-    'antiarr1':'antiarr',
-    'VFVT1':'VFVT',
-    'LBBB1':'LBBB',
-    'deltawave1':'deltawave',
-    "Abnormal_blood_pressure_no_diag1":"Abnormal_blood_pressure_no_diag",
-    "Abnormalities_of_breathing1":"Abnormalities_of_breathing", 
-    "Pain_throat_chest1":"Pain_throat_chest",
-    "Malaise_fatigue1":"Malaise_fatigue",
-    "Syncope_collapse1":"Syncope_collapse",
-    "Convulsions1":"Convulsions",
-    "Shock1":"Shock"
-}
 
 SYMP_DICT = {
     "Abnormal_blood_pressure_no_diag1": "R03",

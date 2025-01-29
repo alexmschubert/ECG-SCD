@@ -198,7 +198,6 @@ def plot_average_error_T(sampleEKG: np.array, sample_length: typing.Optional[int
     for lead, num in zip(names, range(12)):
         axs[num].plot(time, sampleEKG[num, :], "-k", linewidth=1)
         axs[num].set(ylabel="%s /mV" % lead)
-        # axs[num].set_yticks(np.arange(-2, 2, 1))
 
     lines_labels = [ax.get_legend_handles_labels() for ax in fig.axes]
     lines, labels = [sum(lol, []) for lol in zip(*lines_labels)]
@@ -221,7 +220,6 @@ def plot_error_bars(errors, exp_names: typing.Optional[list] = None) -> None:
     for lead, num in zip(channel_names, range(n_channels)):
         axs[num].plot(exp_names, errors.T[num])
         axs[num].set(ylabel="%s /mV" % lead)
-        # axs[num].set_yticks(np.arange(-2, 2, 1))
 
     lines_labels = [ax.get_legend_handles_labels() for ax in fig.axes]
     lines, labels = [sum(lol, []) for lol in zip(*lines_labels)]
@@ -243,7 +241,6 @@ def plot_error_dist(errors, metric_name: typing.Optional[str] = None) -> None:
     for lead, num in zip(channel_names, range(n_channels)):
         axs[num].hist(errors.T.numpy()[num])
         axs[num].set(ylabel="Freq/ %s" % lead)
-        # axs[num].set_yticks(np.arange(-2, 2, 1))
 
     lines_labels = [ax.get_legend_handles_labels() for ax in fig.axes]
     lines, labels = [sum(lol, []) for lol in zip(*lines_labels)]
@@ -264,7 +261,6 @@ def plot_overlay(
     names = ["I", "II", "III", "aVR", "aVL", "aVF", "V1", "V2", "V3", "V4", "V5", "V6"]
     fig, axs = plt.subplots(12, 1, figsize=(3, 12), facecolor="w", edgecolor="k")
     fig.subplots_adjust(hspace=1, wspace=0.001)
-    # fig.suptitle("Sample Input and Recreated EKG for Record %i" % i)
     fig.suptitle(f"EKG Sample with {i}_th Highest Recreation Error")
 
     axs.ravel()
@@ -276,10 +272,6 @@ def plot_overlay(
         axs[num].plot(time, recons[num, :], "--r", linewidth=1)
 
         axs[num].set(ylabel="%s /mV" % lead)
-        # axs[num].set_yticks(np.arange(-0.5, 1, 0.5))
-
-        # anchored_text = AnchoredText("RMSE (adj): " + str(rmse), loc="upper right")
-        # axs[num].add_artist(anchored_text)
 
     lines_labels = [ax.get_legend_handles_labels() for ax in fig.axes]
     lines, labels = [sum(lol, []) for lol in zip(*lines_labels)]
@@ -312,7 +304,6 @@ def plot_diff(
         axs[num].plot(time, sampleEKG[num, :], "-k", linewidth=1)
         axs[num].axvline(x=peaks[num], c="r")
         axs[num].set(ylabel="%s /mV" % lead)
-        # axs[num].set_yticks(np.arange(-2, 2, 1))
 
     lines_labels = [ax.get_legend_handles_labels() for ax in fig.axes]
     lines, labels = [sum(lol, []) for lol in zip(*lines_labels)]

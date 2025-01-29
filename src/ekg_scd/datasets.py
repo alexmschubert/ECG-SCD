@@ -24,13 +24,10 @@ class Hallandata(Dataset):
         train=False,
         aug=None,
         preprocessing=None,
-        wide_features=None,
         sig_length=5000,
         calibration_sig_length=500,
-        # stack=False,
         to_mV = True,
         covariate_df = "path/to/patient_data",
-        # covariate_df_new = False,
         covariate_conditioning = None,
         conditioning_mean = 0,
         conditioning_std = 1,
@@ -44,10 +41,8 @@ class Hallandata(Dataset):
         self.train = train
         self.aug = aug
         self.preprocessing = preprocessing
-        self.wide_features = wide_features
         self.sig_length = sig_length
         self.calibration_sig_length = calibration_sig_length
-        # self.stack = stack
         self.to_mV = to_mV
         self.covariate_conditioning = covariate_conditioning
         self.conditioning_mean = conditioning_mean
@@ -72,24 +67,16 @@ class Hallandata(Dataset):
         self.covariate_df['scd6mo_1'] = (self.covariate_df['scd6mo'] == 0) & (self.covariate_df['scd1'] == 1)
         self.covariate_df['scd1_2'] = (self.covariate_df['scd1'] == 0) & (self.covariate_df['scd2'] == 1)
 
-        # if covariate_df_new:
-        #     self.covariate_df_new = pd.read_feather(covariate_df_new)
-        #     if self.covariate_conditioning is not None:
-        #         key_cols = ['studyId', 'sourceId','scaling_factor'] + outputs + self.covariate_conditioning
-        #     else:
-        #         key_cols = ['studyId', 'sourceId','scaling_factor'] + outputs
-        #     self.covariate_df_new = self.covariate_df_new[key_cols]
-        #     self.covariate_df = self.covariate_df[key_cols]
-        #     self.covariate_df = pd.concat([self.covariate_df, self.covariate_df_new]).reset_index(drop=True)
-
         # Coerce ids to string
         self.ids = [str(id) for id in self.ids]
         self.covariate_df['studyId'] = self.covariate_df['studyId'].astype(str)
 
         self.covariate_df = self.covariate_df[self.covariate_df['studyId'].isin(self.ids)]
         self.covariate_df['studyId2'] = self.covariate_df['studyId']
+
         # Set 'studyId' as the DataFrame index
         self.covariate_df = self.covariate_df.set_index('studyId2')
+
         # Reorder DataFrame rows to match the order of 'ids'
         common_ids = [id for id in self.ids if id in self.covariate_df.index]
         if len(common_ids) != len(self.ids):
@@ -123,11 +110,6 @@ class Hallandata(Dataset):
     def load_data(self, idx):
         # get studyId
         ecg_id = self.ids[idx]
-
-        # if self.stack:
-        #     data = np.load(f"{DATA_DIR}/stacked_X/{ecg_id}.npy")
-        # else:
-        #     data = np.load(f"{self.x_dir}/{ecg_id}.npy")
         
         data = np.load(f"{self.x_dir}/{ecg_id}.npy")
         
@@ -147,13 +129,11 @@ class Hallandata(Dataset):
 
         data = self.process_X(X=data, y=label)
 
-        # Assuming 'data' is your ECG signal and 'original_rate' is 500 Hz
+        # Assuming ECG signal is sampled at 500 Hz
         if self.downsample is not None:
             # Use scipy's resample function to downsample the signal
             data = self.downsample_data(data, original_rate = 500, target_rate = self.downsample)
 
-        if self.wide_features:
-            data = self.concatenate_wide_features(data, y)
 
         data = torch.tensor(data, dtype=torch.float)
         label = torch.tensor(label, dtype=torch.float)
@@ -184,18 +164,6 @@ class Hallandata(Dataset):
 
         return downsampled_data
 
-    def get_wide_features(self, y: dict):
-        wide = np.array([y[feature] for feature in self.wide_features])
-        return wide
-
-    # def concatenate_wide_features(self, X: np.ndarray, y: dict):
-    #     wide = np.array([y[feature] for feature in self.wide_features])
-
-    #     channels = X.shape[0]
-    #     wide_stack = np.array([wide for _ in range(channels)])
-    #     X = np.concatenate((X, wide_stack), axis=1)
-
-    #     return X
 
     def scale_labels(self, label):
         factors = pickle.load(open("out/y_scale_factors.pkl", "rb"))
@@ -259,7 +227,6 @@ class HallandEKGBeats(torch.utils.data.TensorDataset):
         covariate_df = "path/to/patient_metadata.feather",
         to_mV = False, 
         source_labels = False,
-        # clean_beats_path = f'path/to/list_of_accepted_beats.pkl'
     ):
         self.root = root
         self.ids = ids
@@ -325,7 +292,6 @@ class HallandEKGBeats(torch.utils.data.TensorDataset):
             self.filenames = self.clean_filenames
             self.filepaths = self.clean_filepaths
         elif self.one_beat:
-            #filepath = [pathlib.Path(Path, name) for Path, subdirs, files in os.walk(self.root) for name in files]
             filepath = []
             for Path, subdirs, files in os.walk(self.root):
                 if len(files)>=1:
